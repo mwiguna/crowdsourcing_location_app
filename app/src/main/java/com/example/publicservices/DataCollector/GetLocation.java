@@ -13,6 +13,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.publicservices.MainActivity;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -72,9 +74,6 @@ public class GetLocation {
     public Map<String, Object> getAddress(double latitude, double longitude) {
         Map<String, Object> result = new HashMap<>();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String time = sdf.format(new Date());
-
         try {
             Geocoder geocoder = new Geocoder(context, Locale.getDefault());
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
@@ -88,7 +87,7 @@ public class GetLocation {
                     result.put("province", address.getAdminArea());
                     result.put("country", address.getCountryName());
                     result.put("fulladdress", address.getAddressLine(0));
-                    result.put("time", time);
+                    result.put("time", MainActivity.getTimeStamp());
             }
         } catch (IOException e) {
             Log.e("address_error", e.getMessage());
