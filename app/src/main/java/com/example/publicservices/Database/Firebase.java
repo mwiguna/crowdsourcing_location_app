@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.room.Room;
 
+import com.example.publicservices.DataCollector.GetLocation;
 import com.example.publicservices.Database.Model.User;
 import com.example.publicservices.Database.Table.UserDatabase;
 import com.example.publicservices.MainActivity;
@@ -57,7 +58,7 @@ public class Firebase {
 
     public void createUser(final Map<String, Object> data){
         Map<String, Object> user = new HashMap<>();
-        user.put("time", MainActivity.getTimeStamp());
+        user.put("time", GetLocation.getTimeStamp());
 
         db.collection("users")
                 .add(user)
@@ -68,7 +69,7 @@ public class Firebase {
                         AsyncTask.execute(new Runnable() {
                             @Override
                             public void run() {
-                                User user = new User(documentReference.getId(), MainActivity.getTimeStamp());
+                                User user = new User(documentReference.getId(), GetLocation.getTimeStamp());
                                 dbUser.userDao().insert(user);
 
                                 saveLocationOnly(documentReference.getId(), data);

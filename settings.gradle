@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name='PublicServices'
+rootProject.name='Crowdsourcing'

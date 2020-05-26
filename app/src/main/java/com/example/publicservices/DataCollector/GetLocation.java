@@ -13,8 +13,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.publicservices.MainActivity;
-
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,8 +44,8 @@ public class GetLocation {
 
                 new AlertDialog.Builder(context)
                         .setTitle("Izin Lokasi")
-                        .setMessage("Aplikasi ini membutuhkan lokasi agar skripsi saya bisa lancar, mohon bantuannya :(")
-                        .setPositiveButton("TENTU SAJA SAYA MAU MEMBANTU", new DialogInterface.OnClickListener() {
+                        .setMessage("Aplikasi ini membutuhkan data lokasi agar dapat digunakan.")
+                        .setPositiveButton("SAYA MENGERTI", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 ActivityCompat.requestPermissions(activity,
@@ -55,7 +53,7 @@ public class GetLocation {
                                         1);
                             }
                         })
-                        .setNegativeButton("SAYA GAY", new DialogInterface.OnClickListener() {
+                        .setNegativeButton("BELUM BISA", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 dialogInterface.dismiss();
@@ -82,18 +80,26 @@ public class GetLocation {
                     result.put("lat", latitude);
                     result.put("long", longitude);
                     result.put("feature", address.getFeatureName());
+                    result.put("thoroughfare", address.getThoroughfare());
                     result.put("locality", address.getLocality());
                     result.put("city", address.getSubAdminArea());
                     result.put("province", address.getAdminArea());
                     result.put("country", address.getCountryName());
                     result.put("fulladdress", address.getAddressLine(0));
-                    result.put("time", MainActivity.getTimeStamp());
+                    result.put("time", getTimeStamp());
             }
         } catch (IOException e) {
             Log.e("address_error", e.getMessage());
         }
 
         return result;
+    }
+
+    // --------- Tool
+
+    public static String getTimeStamp(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(new Date());
     }
 
 }
