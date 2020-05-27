@@ -1,4 +1,4 @@
-package com.example.publicservices.Database.Model;
+package com.example.crowdsourcing.Database.Model;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;

@@ -1,4 +1,4 @@
-package com.example.publicservices;
+package com.example.crowdsourcing;
 
 import org.junit.Test;
 

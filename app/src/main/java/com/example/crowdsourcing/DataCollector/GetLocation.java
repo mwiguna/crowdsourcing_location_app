@@ -1,4 +1,4 @@
-package com.example.publicservices.DataCollector;
+package com.example.crowdsourcing.DataCollector;
 
 import android.Manifest;
 import android.app.Activity;

@@ -1,13 +1,11 @@
-package com.example.publicservices.Database.Query;
+package com.example.crowdsourcing.Database.Query;
 
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
-import com.example.publicservices.Database.Model.User;
+import com.example.crowdsourcing.Database.Model.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Dao

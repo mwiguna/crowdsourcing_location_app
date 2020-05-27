@@ -1,17 +1,15 @@
-package com.example.publicservices.Database;
+package com.example.crowdsourcing.Database;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.room.Room;
 
-import com.example.publicservices.DataCollector.GetLocation;
-import com.example.publicservices.Database.Model.User;
-import com.example.publicservices.Database.Table.UserDatabase;
-import com.example.publicservices.MainActivity;
+import com.example.crowdsourcing.DataCollector.GetLocation;
+import com.example.crowdsourcing.Database.Model.User;
+import com.example.crowdsourcing.Database.Table.UserDatabase;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
