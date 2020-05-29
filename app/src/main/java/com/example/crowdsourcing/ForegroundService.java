@@ -53,14 +53,19 @@ public class ForegroundService extends Service {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void run() {
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        List<com.example.crowdsourcing.Database.Model.Location> location = dbController.dbLocation.locationDao().get();
-                    }
-                });
+                if(isLocationEnabled()){
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            List<com.example.crowdsourcing.Database.Model.Location> location = dbController.dbLocation.locationDao().get();
+                            if(location.size() > 10) dbController.saveMultipleLocation();
+                            Log.d("Total Local", location.size() + "");
+                        }
+                    });
 
-                if(isLocationEnabled()) requestNewLocationData();
+                    requestNewLocationData();
+                }
+
                 handler.postDelayed(this, 5000);
             }
         };

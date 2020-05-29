@@ -28,6 +28,7 @@ public class DBController {
     public UserDatabase dbUser;
     public LocationDatabase dbLocation;
     public Context context;
+    public boolean sendingProcess = false;
 
     // --------- Initiate
 
@@ -101,55 +102,65 @@ public class DBController {
     }
 
     public void saveMultipleLocation() {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                List<User> user = dbUser.userDao().get();
-                List<Location> location = dbLocation.locationDao().get();
-
-                // --------- Measure Time
-
-                final long start;
-                final long[] stop = new long[1];
-                final long[] calculate = new long[1];
-                final int size = location.size();
-                start = System.currentTimeMillis();
-
-                for (int i = 0; i < size; i++) {
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("user_id", user.get(0).getId());
-                    data.put("lat", location.get(i).getLat());
-                    data.put("lng", location.get(i).getLng());
-                    data.put("time", location.get(i).getTime());
+        if(!sendingProcess) {
+            sendingProcess = true;
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    List<User> user = dbUser.userDao().get();
+                    final List<Location> location = dbLocation.locationDao().limit(10);
 
 
-                    final int finalI = i;
-                    db.collection("locations")
-                            .add(data)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
+                    // --------- Measure Time
 
-                                    // --- If Last data, measure time & delete
+                    final long start;
+                    final long[] stop = new long[1];
+                    final long[] calculate = new long[1];
+                    final int size = location.size();
+                    start = System.currentTimeMillis();
 
-                                    if (finalI == size - 1) {
-                                        stop[0] = System.currentTimeMillis();
-                                        calculate[0] = stop[0] - start;
-                                        Log.d("Perhitungan", "Total: " + size + " Start: " + start + " | stop: " + stop[0] + " | selisih: " + calculate[0]);
+                    for (int i = 0; i < size; i++) {
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("user_id", user.get(0).getId());
+                        data.put("lat", location.get(i).getLat());
+                        data.put("lng", location.get(i).getLng());
+                        data.put("time", location.get(i).getTime());
+
+                        final int finalI = i;
+                        db.collection("locations")
+                                .add(data)
+                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    @Override
+                                    public void onSuccess(DocumentReference documentReference) {
+
+                                        // --- If Last data, measure time & delete
+
+                                        if (finalI == size - 1) {
+                                            stop[0] = System.currentTimeMillis();
+                                            calculate[0] = stop[0] - start;
+                                            Log.d("Total Waktu", "Total Data: " + size + " | Waktu: " + calculate[0] / 1000 + "s");
+
+                                            AsyncTask.execute(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    dbLocation.locationDao().deleteSuccesful(location.get(finalI).getId());
+                                                    sendingProcess = false;
+                                                }
+                                            });
+                                        }
                                     }
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d("location_db", "Error adding location", e);
-                                }
-                            });
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.d("location_db", "Error adding location", e);
+                                    }
+                                });
+                    }
+
                 }
-
-            }
-        });
-
+            });
+        }
     }
 
     // ------------ Tool Only ----------- //

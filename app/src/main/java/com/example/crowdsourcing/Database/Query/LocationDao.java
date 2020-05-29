@@ -14,11 +14,14 @@ public interface LocationDao {
     @Query("SELECT * FROM location")
     List<Location> get();
 
+    @Query("SELECT * FROM location ORDER BY id ASC LIMIT :limit")
+    List<Location> limit(int limit);
+
     @Insert
     void insert(Location location);
 
-    @Query("DELETE FROM location")
-    void deleteSuccesful();
+    @Query("DELETE FROM location WHERE id < :id OR id = :id")
+    void deleteSuccesful(int id);
 
     @Query("DELETE FROM location")
     void reset();
