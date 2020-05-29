@@ -7,7 +7,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.room.Room;
 
-import com.example.crowdsourcing.DataCollector.GetLocation;
 import com.example.crowdsourcing.Database.Model.Location;
 import com.example.crowdsourcing.Database.Model.User;
 import com.example.crowdsourcing.Database.Table.LocationDatabase;
@@ -61,7 +60,7 @@ public class DBController {
 
     private void createUser(){
         Map<String, Object> user = new HashMap<>();
-        user.put("time", GetLocation.getTimeStamp());
+        user.put("time", ForegroundService.getTimeStamp());
 
         db.collection("users")
                 .add(user)
@@ -72,7 +71,7 @@ public class DBController {
                         AsyncTask.execute(new Runnable() {
                             @Override
                             public void run() {
-                                User user = new User(documentReference.getId(), GetLocation.getTimeStamp());
+                                User user = new User(documentReference.getId(), ForegroundService.getTimeStamp());
                                 dbUser.userDao().insert(user);
                             }
                         });
@@ -108,9 +107,8 @@ public class DBController {
                 @Override
                 public void run() {
                     List<User> user = dbUser.userDao().get();
-                    final List<Location> location = dbLocation.locationDao().limit(10);
-
-
+                    final List<Location> location = dbLocation.locationDao().limit(50);
+                    
                     // --------- Measure Time
 
                     final long start;
@@ -133,7 +131,7 @@ public class DBController {
                                     @Override
                                     public void onSuccess(DocumentReference documentReference) {
 
-                                        // --- If Last data, measure time & delete
+                                        // --- If Last data, measure time & delete ---- //
 
                                         if (finalI == size - 1) {
                                             stop[0] = System.currentTimeMillis();

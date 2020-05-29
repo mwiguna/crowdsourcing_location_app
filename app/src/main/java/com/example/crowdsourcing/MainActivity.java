@@ -1,26 +1,27 @@
 package com.example.crowdsourcing;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.crowdsourcing.DataCollector.GetLocation;
 import com.example.crowdsourcing.Database.DBController;
 
 
 public class MainActivity extends AppCompatActivity {
-    GetLocation getLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,19 +36,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void init(){
        if(!isMyServiceRunning(ForegroundService.class)) startService();
-       getLocation = new GetLocation(MainActivity.this, MainActivity.this);
-       getLocation.getLocation();
 
-        DBController dbController = new DBController(this);
-        dbController.firstInitiate();
+       DBController dbController = new DBController(this);
+       dbController.firstInitiate();
 
-       Button btnGet = findViewById(R.id.btnGet);
-       btnGet.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               getLocation.getLocation();
-           }
-       });
+       getPermission();
     }
 
 
@@ -88,5 +81,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // ------- ALUR : Main activity > Start foreground > foreground mengakses DB dan akses Lokasi > DB Controller menyimpan & hapus data
+    //    -------------------------- Permission
+
+    public boolean getPermission(){
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                new AlertDialog.Builder(this)
+                        .setTitle("Izin Lokasi")
+                        .setMessage("Aplikasi ini membutuhkan data lokasi agar dapat digunakan.")
+                        .setPositiveButton("SAYA MENGERTI", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ActivityCompat.requestPermissions(MainActivity.this,
+                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        1);
+                            }
+                        })
+                        .setNegativeButton("BELUM BISA", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        }).create().show();
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+            } return false;
+        } else return true;
+    }
+
+
+    // ------- ALUR :
+    // > Main Activiy Check permission, Start foreground
+    // > foreground mengakses DBController dan mendapatkan Lokasi
+    // > DB Controller menyimpan & hapus data dari room dan firebase
 }

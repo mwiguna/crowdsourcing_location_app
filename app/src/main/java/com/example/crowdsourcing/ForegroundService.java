@@ -58,7 +58,7 @@ public class ForegroundService extends Service {
                         @Override
                         public void run() {
                             List<com.example.crowdsourcing.Database.Model.Location> location = dbController.dbLocation.locationDao().get();
-                            if(location.size() > 10) dbController.saveMultipleLocation();
+                            if(location.size() > 50) dbController.saveMultipleLocation();
                             Log.d("Total Local", location.size() + "");
                         }
                     });
@@ -66,11 +66,11 @@ public class ForegroundService extends Service {
                     requestNewLocationData();
                 }
 
-                handler.postDelayed(this, 5000);
+                handler.postDelayed(this, 60000);
             }
         };
 
-        handler.postDelayed(r, 5000);
+        handler.postDelayed(r, 60000);
 
         return START_STICKY;
     }
