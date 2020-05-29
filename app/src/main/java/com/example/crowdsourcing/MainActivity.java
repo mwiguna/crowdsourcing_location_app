@@ -16,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.example.crowdsourcing.DataCollector.GetLocation;
+import com.example.crowdsourcing.Database.DBController;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
        if(!isMyServiceRunning(ForegroundService.class)) startService();
        getLocation = new GetLocation(MainActivity.this, MainActivity.this);
        getLocation.getLocation();
+
+        DBController dbController = new DBController(this);
+        dbController.firstInitiate();
 
        Button btnGet = findViewById(R.id.btnGet);
        btnGet.setOnClickListener(new View.OnClickListener() {
@@ -83,4 +87,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    // ------- ALUR : Main activity > Start foreground > foreground mengakses DB dan akses Lokasi > DB Controller menyimpan & hapus data
 }

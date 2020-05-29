@@ -18,5 +18,8 @@ public interface LocationDao {
     void insert(Location location);
 
     @Query("DELETE FROM location")
+    void deleteSuccesful();
+
+    @Query("DELETE FROM location")
     void reset();
 }

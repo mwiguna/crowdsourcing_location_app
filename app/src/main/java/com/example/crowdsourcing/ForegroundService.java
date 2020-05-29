@@ -12,6 +12,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,14 +23,12 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
-import com.example.crowdsourcing.DataCollector.GetLocation;
 import com.example.crowdsourcing.Database.DBController;
-import com.google.android.gms.location.LocationRequest;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class ForegroundService extends Service {
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
@@ -46,7 +45,7 @@ public class ForegroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         createNotificationChannel();
 
-        //do heavy work on a background thread
+        // ---------- Main Thread
 
         dbController = new DBController(this);
         handler = new Handler();
@@ -54,7 +53,14 @@ public class ForegroundService extends Service {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void run() {
-                requestNewLocationData();
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<com.example.crowdsourcing.Database.Model.Location> location = dbController.dbLocation.locationDao().get();
+                    }
+                });
+
+                if(isLocationEnabled()) requestNewLocationData();
                 handler.postDelayed(this, 5000);
             }
         };
@@ -136,4 +142,17 @@ public class ForegroundService extends Service {
         public void onProviderDisabled(String s) {}
     };
 
+
+    // --------------- Tool
+
+
+    private boolean isLocationEnabled(){
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    public static String getTimeStamp(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(new Date());
+    }
 }

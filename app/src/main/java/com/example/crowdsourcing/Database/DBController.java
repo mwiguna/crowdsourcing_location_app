@@ -12,13 +12,12 @@ import com.example.crowdsourcing.Database.Model.Location;
 import com.example.crowdsourcing.Database.Model.User;
 import com.example.crowdsourcing.Database.Table.LocationDatabase;
 import com.example.crowdsourcing.Database.Table.UserDatabase;
+import com.example.crowdsourcing.ForegroundService;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,26 +40,25 @@ public class DBController {
     }
 
 
-    // Check User First
+    // ----------- Check User
 
-    public void saveDataLocation(final Map<String, Object> data){
+    public void firstInitiate(){
 
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 List<User> user = dbUser.userDao().get();
-                if(user.size() > 0){
-                    String id = user.get(0).getId();
-                    saveLocationOnly(id, data);
-                } else createUser(data);
+                if(user.size() == 0) createUser();
             }
         });
 
     }
 
-    // Create id user
 
-    public void createUser(final Map<String, Object> data){
+    // ----------- Create id user
+
+
+    private void createUser(){
         Map<String, Object> user = new HashMap<>();
         user.put("time", GetLocation.getTimeStamp());
 
@@ -75,8 +73,6 @@ public class DBController {
                             public void run() {
                                 User user = new User(documentReference.getId(), GetLocation.getTimeStamp());
                                 dbUser.userDao().insert(user);
-
-                                saveLocationOnly(documentReference.getId(), data);
                             }
                         });
 
@@ -90,38 +86,74 @@ public class DBController {
                 });
     }
 
-    // After Check user
-
-    public void saveLocationOnly(String id, Map<String, Object> data){
-        data.put("user_id", id);
-
-        db.collection("locations")
-                .add(data)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("lokasi_db", "Success Add ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d("lokasi_db", "Error adding document", e);
-                    }
-                });
-    }
 
     // -------- Insert Location Local
+
 
     public void saveDataRoom(final Double lat, final Double lng){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                Location location = new Location(lat.toString(), lng.toString(), getTimeStamp());
+                Location location = new Location(lat.toString(), lng.toString(), ForegroundService.getTimeStamp());
                 dbLocation.locationDao().insert(location);
             }
         });
     }
+
+    public void saveMultipleLocation() {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<User> user = dbUser.userDao().get();
+                List<Location> location = dbLocation.locationDao().get();
+
+                // --------- Measure Time
+
+                final long start;
+                final long[] stop = new long[1];
+                final long[] calculate = new long[1];
+                final int size = location.size();
+                start = System.currentTimeMillis();
+
+                for (int i = 0; i < size; i++) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("user_id", user.get(0).getId());
+                    data.put("lat", location.get(i).getLat());
+                    data.put("lng", location.get(i).getLng());
+                    data.put("time", location.get(i).getTime());
+
+
+                    final int finalI = i;
+                    db.collection("locations")
+                            .add(data)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+
+                                    // --- If Last data, measure time & delete
+
+                                    if (finalI == size - 1) {
+                                        stop[0] = System.currentTimeMillis();
+                                        calculate[0] = stop[0] - start;
+                                        Log.d("Perhitungan", "Total: " + size + " Start: " + start + " | stop: " + stop[0] + " | selisih: " + calculate[0]);
+                                    }
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d("location_db", "Error adding location", e);
+                                }
+                            });
+                }
+
+            }
+        });
+
+    }
+
+    // ------------ Tool Only ----------- //
+
 
     public void showLocation(){
         AsyncTask.execute(new Runnable() {
@@ -140,8 +172,4 @@ public class DBController {
     }
 
 
-    public static String getTimeStamp(){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdf.format(new Date());
-    }
 }

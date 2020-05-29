@@ -41,7 +41,7 @@ import java.util.concurrent.Executor;
 
 public class GetLocation {
 
-    //    CLASS INI TIDAK DIGUNAKAN SECARA LANGSUNG. HANYA DOKUMENTASI / TESTING
+    //    CLASS INI TIDAK DIGUNAKAN SECARA LANGSUNG. HANYA GET PERMISSION, DOKUMENTASI, TESTING
 
     public Context context;
     public Activity activity;
@@ -114,12 +114,6 @@ public class GetLocation {
 
     @SuppressLint("MissingPermission")
     private void requestNewLocationData(){
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(5000);
-        mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setNumUpdates(1);
-
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -142,19 +136,13 @@ public class GetLocation {
         }
 
         @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-            Log.d("lokasi-old", "status");
-        }
+        public void onStatusChanged(String s, int i, Bundle bundle) {}
 
         @Override
-        public void onProviderEnabled(String s) {
-            Log.d("lokasi-old", "providerenable");
-        }
+        public void onProviderEnabled(String s) {}
 
         @Override
-        public void onProviderDisabled(String s) {
-            Log.d("lokasi-old", "providerdisable");
-        }
+        public void onProviderDisabled(String s) {}
     };
 
 
